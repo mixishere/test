@@ -1,0 +1,438 @@
+// OPERATIO — v0.7.0
+// Emerald Mint Edition — Full Regeneration
+
+const operatio = {
+    version: "0.7.0",
+
+    palette: {
+        bg: "#d0ffe8",
+        panel: "#b4f2d0",
+        accent: "#4ecb8a",
+        text: "#08321d",
+        border: "#7ee3b4"
+    },
+
+    init() {
+        this.createMain();
+        this.createTitle();
+        this.createKeyPadLauncher();
+    },
+
+    // MAIN BODY -----------------------------------------------------
+    createMain() {
+        const main = document.createElement("div");
+        main.id = "operatio-main";
+        Object.assign(main.style, {
+            position: "fixed",
+            top: "40px",
+            left: "40px",
+            width: "420px",
+            height: "260px",
+            background: this.palette.bg,
+            border: `3px solid ${this.palette.border}`,
+            borderRadius: "12px",
+            boxShadow: "0 0 12px rgba(0,0,0,0.15)",
+            fontFamily: "monospace",
+            color: this.palette.text,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+        });
+        document.body.appendChild(main);
+    },
+
+    // TITLE BAR -----------------------------------------------------
+    createTitle() {
+        const bar = document.createElement("div");
+        bar.id = "operatio-title";
+        bar.innerText = `OPERATIO — v${this.version}`;
+        Object.assign(bar.style, {
+            padding: "10px 14px",
+            background: this.palette.panel,
+            borderBottom: `2px solid ${this.palette.border}`,
+            fontWeight: "bold",
+            fontSize: "14px",
+            cursor: "move",
+            userSelect: "none"
+        });
+
+        const main = document.getElementById("operatio-main");
+        main.appendChild(bar);
+
+        this.makeHeaderDraggable(main, bar);
+    },
+
+    // KEYPAD LAUNCHER ----------------------------------------------
+    createKeyPadLauncher() {
+        const btn = document.createElement("button");
+        btn.innerText = "Launch Key Pad";
+        Object.assign(btn.style, {
+            margin: "20px auto",
+            padding: "12px 20px",
+            background: this.palette.accent,
+            border: "none",
+            borderRadius: "8px",
+            color: "#000",
+            fontSize: "15px",
+            fontWeight: "600",
+            cursor: "pointer",
+            textShadow: "0 1px 0 rgba(255,255,255,0.4)"
+        });
+
+        btn.onclick = () => this.spawnKeyPad();
+        document.getElementById("operatio-main").appendChild(btn);
+    },
+
+    // KEYPAD --------------------------------------------------------
+    spawnKeyPad() {
+        if (document.getElementById("operatio-keypad")) return;
+
+        const pad = document.createElement("div");
+        pad.id = "operatio-keypad";
+        Object.assign(pad.style, {
+            position: "fixed",
+            top: "320px",
+            left: "40px",
+            width: "420px",
+            background: this.palette.bg,
+            border: `3px solid ${this.palette.border}`,
+            borderRadius: "12px",
+            boxShadow: "0 0 12px rgba(0,0,0,0.15)",
+            fontFamily: "monospace",
+            color: this.palette.text,
+            overflow: "hidden"
+        });
+
+        // HEADER
+        const header = document.createElement("div");
+        header.innerText = "⁜ KEYPAD";
+        Object.assign(header.style, {
+            background: this.palette.panel,
+            padding: "10px 14px",
+            borderBottom: `2px solid ${this.palette.border}`,
+            fontWeight: "bold",
+            fontSize: "14px",
+            cursor: "move",
+            userSelect: "none"
+        });
+        pad.appendChild(header);
+
+        // BODY
+        const body = document.createElement("div");
+        Object.assign(body.style, {
+            padding: "14px",
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "10px"
+        });
+        pad.appendChild(body);
+
+        const buttons = [
+            { label: "Consolify", action: () => this.consolify() },
+            { label: "Chrono", action: () => this.openChrono() },
+            { label: "Vector", action: () => this.openVector() },
+            { label: "Pulse", action: () => this.openPulse() },
+            { label: "Forge", action: () => this.openForge() },
+            { label: "Commands", action: () => this.openConsolifyHelp() }
+        ];
+
+        buttons.forEach(b => {
+            const btn = document.createElement("button");
+            btn.innerText = b.label;
+            Object.assign(btn.style, {
+                background: this.palette.accent,
+                border: "none",
+                borderRadius: "8px",
+                padding: "10px",
+                fontSize: "15px",
+                fontWeight: "600",
+                cursor: "pointer",
+                color: "#000",
+                textShadow: "0 1px 0 rgba(255,255,255,0.4)"
+            });
+            btn.onclick = b.action;
+            body.appendChild(btn);
+        });
+
+        document.body.appendChild(pad);
+        this.makeHeaderDraggable(pad, header);
+    },
+
+    // HEADER-ONLY DRAGGING -----------------------------------------
+    makeHeaderDraggable(mod, header) {
+        let dragging = false, offsetX = 0, offsetY = 0;
+
+        const onMouseDown = (e) => {
+            dragging = true;
+            offsetX = e.clientX - mod.offsetLeft;
+            offsetY = e.clientY - mod.offsetTop;
+        };
+
+        const onMouseMove = (e) => {
+            if (!dragging) return;
+            mod.style.left = (e.clientX - offsetX) + "px";
+            mod.style.top = (e.clientY - offsetY) + "px";
+        };
+
+        const onMouseUp = () => dragging = false;
+
+        header.addEventListener("mousedown", onMouseDown);
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+    },
+
+    // MODULE SPAWNER ------------------------------------------------
+    spawnModule(id, title) {
+        const mod = document.createElement("div");
+        mod.id = `operatio-${id}`;
+        Object.assign(mod.style, {
+            position: "fixed",
+            top: (200 + Math.random()*300) + "px",
+            left: (200 + Math.random()*300) + "px",
+            width: "340px",
+            background: this.palette.bg,
+            border: `3px solid ${this.palette.border}`,
+            borderRadius: "12px",
+            boxShadow: "0 0 12px rgba(0,0,0,0.15)",
+            fontFamily: "monospace",
+            color: this.palette.text,
+            overflow: "hidden"
+        });
+
+        const header = document.createElement("div");
+        header.innerText = title;
+        Object.assign(header.style, {
+            background: this.palette.panel,
+            padding: "10px 14px",
+            borderBottom: `2px solid ${this.palette.border}`,
+            fontWeight: "bold",
+            fontSize: "14px",
+            cursor: "move",
+            userSelect: "none"
+        });
+        mod.appendChild(header);
+
+        const body = document.createElement("div");
+        Object.assign(body.style, {
+            padding: "14px",
+            fontSize: "14px",
+            color: this.palette.text
+        });
+        mod.appendChild(body);
+
+        document.body.appendChild(mod);
+        this.makeHeaderDraggable(mod, header);
+
+        return body;
+    },
+
+    // MODULES -------------------------------------------------------
+
+    openChrono() {
+        if (document.getElementById("operatio-chrono")) return;
+        const body = this.spawnModule("chrono", "CHRONO MODULE");
+
+        body.innerHTML = `
+            <span id="chrono-display">0.0s</span><br><br>
+            <button id="chrono-start">Start</button>
+            <button id="chrono-stop">Stop</button>
+            <button id="chrono-reset">Reset</button>
+        `;
+
+        ["chrono-start","chrono-stop","chrono-reset"].forEach(id=>{
+            const btn=document.getElementById(id);
+            Object.assign(btn.style,{
+                background:this.palette.accent,
+                border:"none",
+                borderRadius:"8px",
+                padding:"8px 12px",
+                fontSize:"14px",
+                fontWeight:"600",
+                cursor:"pointer",
+                color:"#000",
+                textShadow:"0 1px 0 rgba(255,255,255,0.4)"
+            });
+        });
+
+        let t = 0, interval = null;
+
+        document.getElementById("chrono-start").onclick = () => {
+            if (!interval) interval = setInterval(() => {
+                t += 0.1;
+                document.getElementById("chrono-display").innerText = t.toFixed(1) + "s";
+            }, 100);
+        };
+
+        document.getElementById("chrono-stop").onclick = () => {
+            clearInterval(interval);
+            interval = null;
+        };
+
+        document.getElementById("chrono-reset").onclick = () => {
+            t = 0;
+            document.getElementById("chrono-display").innerText = "0.0s";
+        };
+    },
+
+    openVector() {
+        if (document.getElementById("operatio-vector")) return;
+        const body = this.spawnModule("vector", "VECTOR MODULE");
+
+        body.innerHTML = `
+            X: <span id="vec-x">0</span><br>
+            Y: <span id="vec-y">0</span><br>
+            Dist: <span id="vec-dist">0</span><br>
+            Angle: <span id="vec-angle">0°</span>
+        `;
+
+        const onMove = (e) => {
+            const x = e.clientX, y = e.clientY;
+            const dist = Math.sqrt(x*x + y*y);
+            const angle = Math.atan2(y, x) * (180 / Math.PI);
+
+            const xEl = document.getElementById("vec-x");
+            if (!xEl) { window.removeEventListener("mousemove", onMove); return; }
+
+            xEl.innerText = x;
+            document.getElementById("vec-y").innerText = y;
+            document.getElementById("vec-dist").innerText = dist.toFixed(1);
+            document.getElementById("vec-angle").innerText = angle.toFixed(1) + "°";
+        };
+
+        window.addEventListener("mousemove", onMove);
+    },
+
+    openPulse() {
+        if (document.getElementById("operatio-pulse")) return;
+        const body = this.spawnModule("pulse", "PULSE MODULE");
+
+        body.innerHTML = `
+            Last Event: <span id="pulse-last">None</span><br><br>
+            Listening for:<br>
+            - Clicks<br>
+            - Keypresses<br>
+            - Mouse movement
+        `;
+
+        const last = () => document.getElementById("pulse-last");
+
+        const onClick = () => { const el = last(); if (el) el.innerText = "Click"; };
+        const onKey = () => { const el = last(); if (el) el.innerText = "Keypress"; };
+        const onMove = () => { const el = last(); if (el) el.innerText = "Mouse Move"; };
+
+        window.addEventListener("click", onClick);
+        window.addEventListener("keydown", onKey);
+        window.addEventListener("mousemove", onMove);
+    },
+
+    openForge() {
+        if (document.getElementById("operatio-forge")) return;
+        const body = this.spawnModule("forge", "FORGE MODULE");
+
+        body.innerHTML = `
+            <input id="forge-text" placeholder="text"><br><br>
+            <button id="forge-make">Make</button>
+            <div id="forge-out"></div>
+        `;
+
+        const btn = document.getElementById("forge-make");
+        Object.assign(btn.style, {
+            background: this.palette.accent,
+            border: "none",
+            borderRadius: "8px",
+            padding: "8px 12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            cursor: "pointer",
+            color: "#000",
+            textShadow: "0 1px 0 rgba(255,255,255,0.4)"
+        });
+
+        btn.onclick = () => {
+            const val = document.getElementById("forge-text").value;
+            if (!val) return;
+
+            const out = document.getElementById("forge-out");
+            const el = document.createElement("div");
+            el.innerText = val;
+            Object.assign(el.style, {
+                padding: "6px",
+                marginTop: "6px",
+                background: this.palette.panel,
+                borderRadius: "6px",
+                border: `1px solid ${this.palette.border}`,
+                color: this.palette.text
+            });
+            out.appendChild(el);
+        };
+    },
+
+    openConsolifyHelp() {
+        if (document.getElementById("operatio-consolify-help")) return;
+        const body = this.spawnModule("consolify-help", "CONSOLIFY COMMANDS");
+
+        body.innerHTML = `
+            <b>Available Commands:</b><br><br>
+            hide – fade out Operatio<br>
+            show – fade in Operatio<br>
+            close – close keypad + modules<br>
+            minimize – collapse Operatio to title bar<br>
+            restore – expand Operatio<br>
+            ghost – set opacity to 0.1<br>
+            solid – set opacity to 1<br>
+        `;
+    },
+
+    // CONSOLIFY -----------------------------------------------------
+    consolify() {
+        console.log("%cOPERATIO: Console listening for code-words.",
+            "color:#08321d; background:#b4f2d0; padding:6px; font-weight:bold;");
+
+        window.operatioCommand = (word) => {
+            const main = document.getElementById("operatio-main");
+            const pad = document.getElementById("operatio-keypad");
+
+            switch(word) {
+                case "hide":
+                    main.style.opacity = "0";
+                    if (pad) pad.style.opacity = "0";
+                    break;
+
+                case "show":
+                    main.style.opacity = "1";
+                    if (pad) pad.style.opacity = "1";
+                    break;
+
+                case "close":
+                    if (pad) pad.remove();
+                    document.querySelectorAll("[id^='operatio-']").forEach(m => {
+                        if (m.id !== "operatio-main") m.remove();
+                    });
+                    break;
+
+                case "minimize":
+                    main.style.height = "40px";
+                    break;
+
+                case "restore":
+                    main.style.height = "260px";
+                    break;
+
+                case "ghost":
+                    main.style.opacity = "0.1";
+                    if (pad) pad.style.opacity = "0.1";
+                    break;
+
+                case "solid":
+                    main.style.opacity = "1";
+                    if (pad) pad.style.opacity = "1";
+                    break;
+
+                default:
+                    console.log("Unknown command:", word);
+            }
+        };
+    }
+};
+
+operatio.init();
